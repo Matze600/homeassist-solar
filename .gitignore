@@ -11,6 +11,7 @@ config/home-assistant.log.*
 
 # Home Assistant - generierte Dateien
 config/.cache/
+config/.ha_run.lock
 config/deps/
 config/tts/
 config/.HA_VERSION
