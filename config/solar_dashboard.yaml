@@ -4,47 +4,19 @@ views:
     path: solar-uebersicht
     icon: mdi:solar-power
     cards:
-      - type: markdown
-        content: >
-          # PV Gesamt: {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
-          + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0)) | round(0) }} W
-
       - type: vertical-stack
         cards:
           - type: markdown
             content: "## Hoymiles HMS-1600-4T"
           - type: gauge
             entity: sensor.wechselrichter_ac_leistung
-            name: Gesamtleistung Hoymiles
+            name: Aktuelle Leistung
             min: 0
             max: 1600
-            needle: true
             severity:
               green: 800
               yellow: 400
               red: 0
-          - type: horizontal-stack
-            cards:
-              - type: gauge
-                entity: sensor.wechselrichter_port_1_dc_leistung
-                name: Panel 1
-                min: 0
-                max: 400
-              - type: gauge
-                entity: sensor.wechselrichter_port_2_dc_leistung
-                name: Panel 2
-                min: 0
-                max: 400
-              - type: gauge
-                entity: sensor.wechselrichter_port_3_dc_leistung
-                name: Panel 3
-                min: 0
-                max: 400
-              - type: gauge
-                entity: sensor.wechselrichter_port_4_dc_leistung
-                name: Panel 4
-                min: 0
-                max: 400
           - type: glance
             show_name: true
             title: Tagesertrag pro Panel
@@ -103,3 +75,38 @@ views:
                 name: Netzleistung
               - entity: sensor.sn_XXXXXXXXXX_status
                 name: Status
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: >
+              # PV Gesamt: {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
+              + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0)) | round(0) }} W
+          - type: gauge
+            entity: sensor.wechselrichter_ac_leistung
+            name: Gesamtleistung Hoymiles
+            min: 0
+            max: 1600
+            needle: true
+          - type: horizontal-stack
+            cards:
+              - type: gauge
+                entity: sensor.wechselrichter_port_1_dc_leistung
+                name: Panel 1
+                min: 0
+                max: 400
+              - type: gauge
+                entity: sensor.wechselrichter_port_2_dc_leistung
+                name: Panel 2
+                min: 0
+                max: 400
+              - type: gauge
+                entity: sensor.wechselrichter_port_3_dc_leistung
+                name: Panel 3
+                min: 0
+                max: 400
+              - type: gauge
+                entity: sensor.wechselrichter_port_4_dc_leistung
+                name: Panel 4
+                min: 0
+                max: 400
