@@ -1,0 +1,23 @@
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "homeassistant/home-assistant:stable"
+    volumes:
+      - /home/home/homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - mosquitto
+
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    volumes:
+      - /home/home/homeassistant/mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /home/home/homeassistant/mosquitto/data:/mosquitto/data
+      - /home/home/homeassistant/mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
