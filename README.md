@@ -30,7 +30,10 @@ Home Assistant Setup zur zentralen Überwachung einer PV-Anlage mit **Hoymiles H
 ## Dashboard
 
 Solar-Dashboard mit:
-- Aktuelle PV-Leistung (Gauge) für beide Wechselrichter
+- **PV Gesamtleistung** (Hoymiles + SMA kombiniert) als Live-Wert oben
+- Aktuelle Leistung je Panel (Hoymiles Port 1–4) als Gauges
+- Gesamtleistung Hoymiles als Gauge
+- Aktuelle PV-Leistung SMA als Gauge
 - Tages- und Gesamtertrag pro Panel (Hoymiles, 4 Ports)
 - Netzleistung (Bezug/Einspeisung)
 - Wechselrichter-Details (Temperatur, Spannung, Frequenz, Status)
