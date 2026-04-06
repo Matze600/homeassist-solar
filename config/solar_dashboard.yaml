@@ -1,0 +1,79 @@
+title: Solar
+views:
+  - title: Übersicht
+    path: solar-uebersicht
+    icon: mdi:solar-power
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Hoymiles HMS-1600-4T"
+          - type: gauge
+            entity: sensor.wechselrichter_ac_leistung
+            name: Aktuelle Leistung
+            min: 0
+            max: 1600
+            unit: W
+            severity:
+              green: 800
+              yellow: 400
+              red: 0
+          - type: glance
+            show_name: true
+            show_icon: true
+            entities:
+              - entity: sensor.wechselrichter_port_1_dc_tagesenergie
+                name: Port 1 Heute
+              - entity: sensor.wechselrichter_port_2_dc_tagesenergie
+                name: Port 2 Heute
+              - entity: sensor.wechselrichter_port_3_dc_tagesenergie
+                name: Port 3 Heute
+              - entity: sensor.wechselrichter_port_4_dc_tagesenergie
+                name: Port 4 Heute
+          - type: glance
+            show_name: true
+            show_icon: true
+            entities:
+              - entity: sensor.wechselrichter_port_1_dc_gesamtenergie
+                name: Port 1 Gesamt
+              - entity: sensor.wechselrichter_port_2_dc_gesamtenergie
+                name: Port 2 Gesamt
+              - entity: sensor.wechselrichter_port_3_dc_gesamtenergie
+                name: Port 3 Gesamt
+              - entity: sensor.wechselrichter_port_4_dc_gesamtenergie
+                name: Port 4 Gesamt
+          - type: entities
+            title: Details
+            entities:
+              - entity: sensor.wechselrichter_temperatur
+                name: Temperatur
+              - entity: sensor.wechselrichter_netzspannung
+                name: Netzspannung
+              - entity: sensor.wechselrichter_netzfrequenz
+                name: Netzfrequenz
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## SMA Wechselrichter"
+          - type: gauge
+            entity: sensor.sn_XXXXXXXXXX_pv_power
+            name: PV Leistung
+            min: 0
+            max: 5000
+            unit: W
+            severity:
+              green: 2500
+              yellow: 1000
+              red: 0
+          - type: entities
+            title: Ertrag
+            entities:
+              - entity: sensor.sn_XXXXXXXXXX_daily_yield
+                name: Tagesertrag
+              - entity: sensor.sn_XXXXXXXXXX_total_yield
+                name: Gesamtertrag
+              - entity: sensor.sn_XXXXXXXXXX_operating_status
+                name: Status
+              - entity: sensor.sn_XXXXXXXXXX_status
+                name: Betriebsstatus

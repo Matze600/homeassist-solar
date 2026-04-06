@@ -1,0 +1,25 @@
+# Home Assistant - sensible Daten
+config/.storage/
+config/.cloud/
+config/secrets.yaml
+config/known_devices.yaml
+config/home-assistant_v2.db
+config/home-assistant_v2.db-shm
+config/home-assistant_v2.db-wal
+config/home-assistant.log
+config/home-assistant.log.*
+
+# Home Assistant - generierte Dateien
+config/.cache/
+config/deps/
+config/tts/
+config/.HA_VERSION
+config/OZW_Log.txt
+
+# HACS - wird automatisch installiert
+config/custom_components/hacs/
+config/custom_components/hoymiles_wifi/
+
+# Mosquitto - Laufzeitdaten
+mosquitto/data/
+mosquitto/log/
