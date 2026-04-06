@@ -4,44 +4,71 @@ views:
     path: solar-uebersicht
     icon: mdi:solar-power
     cards:
+      - type: markdown
+        content: >
+          # PV Gesamt: {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
+          + states('sensor.sn_3015681731_pv_power') | float(0)) | round(0) }} W
+
       - type: vertical-stack
         cards:
           - type: markdown
             content: "## Hoymiles HMS-1600-4T"
           - type: gauge
             entity: sensor.wechselrichter_ac_leistung
-            name: Aktuelle Leistung
+            name: Gesamtleistung Hoymiles
             min: 0
             max: 1600
-            unit: W
+            needle: true
             severity:
               green: 800
               yellow: 400
               red: 0
+          - type: horizontal-stack
+            cards:
+              - type: gauge
+                entity: sensor.wechselrichter_port_1_dc_leistung
+                name: Panel 1
+                min: 0
+                max: 400
+              - type: gauge
+                entity: sensor.wechselrichter_port_2_dc_leistung
+                name: Panel 2
+                min: 0
+                max: 400
+              - type: gauge
+                entity: sensor.wechselrichter_port_3_dc_leistung
+                name: Panel 3
+                min: 0
+                max: 400
+              - type: gauge
+                entity: sensor.wechselrichter_port_4_dc_leistung
+                name: Panel 4
+                min: 0
+                max: 400
           - type: glance
             show_name: true
-            show_icon: true
+            title: Tagesertrag pro Panel
             entities:
               - entity: sensor.wechselrichter_port_1_dc_tagesenergie
-                name: Port 1 Heute
+                name: Port 1
               - entity: sensor.wechselrichter_port_2_dc_tagesenergie
-                name: Port 2 Heute
+                name: Port 2
               - entity: sensor.wechselrichter_port_3_dc_tagesenergie
-                name: Port 3 Heute
+                name: Port 3
               - entity: sensor.wechselrichter_port_4_dc_tagesenergie
-                name: Port 4 Heute
+                name: Port 4
           - type: glance
             show_name: true
-            show_icon: true
+            title: Gesamtertrag pro Panel
             entities:
               - entity: sensor.wechselrichter_port_1_dc_gesamtenergie
-                name: Port 1 Gesamt
+                name: Port 1
               - entity: sensor.wechselrichter_port_2_dc_gesamtenergie
-                name: Port 2 Gesamt
+                name: Port 2
               - entity: sensor.wechselrichter_port_3_dc_gesamtenergie
-                name: Port 3 Gesamt
+                name: Port 3
               - entity: sensor.wechselrichter_port_4_dc_gesamtenergie
-                name: Port 4 Gesamt
+                name: Port 4
           - type: entities
             title: Details
             entities:
@@ -61,19 +88,18 @@ views:
             name: PV Leistung
             min: 0
             max: 5000
-            unit: W
             severity:
               green: 2500
               yellow: 1000
               red: 0
           - type: entities
-            title: Ertrag
+            title: Ertrag & Status
             entities:
               - entity: sensor.sn_3015681731_daily_yield
                 name: Tagesertrag
               - entity: sensor.sn_3015681731_total_yield
                 name: Gesamtertrag
-              - entity: sensor.sn_3015681731_operating_status
-                name: Status
+              - entity: sensor.sn_3015681731_grid_power
+                name: Netzleistung
               - entity: sensor.sn_3015681731_status
-                name: Betriebsstatus
+                name: Status
