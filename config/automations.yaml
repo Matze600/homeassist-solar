@@ -1,18 +1,21 @@
 - id: heizstab_solar_ein
-  alias: "Heizstab EIN bei Solar-Überschuss"
+  alias: "Heizstab EIN bei vollem Akku und PV-Überschuss"
   description: >
-    Schaltet Heizstab (Shelly) ein, wenn mindestens 500W Solarüberschuss
-    für 5 Minuten anliegen.
+    Schaltet Heizstab (Shelly) ein, wenn Batterie >= 90% und PV > 1500W
+    für 5 Minuten — dann ist genug Überschuss für den Heizstab (~2kW).
   trigger:
     - platform: numeric_state
-      entity_id: sensor.solar_ueberschuss
-      above: 500
+      entity_id: sensor.sn_XXXXXXXXXX_battery_soc_total
+      above: 90
       for:
         minutes: 5
   condition:
     - condition: state
       entity_id: input_boolean.heizstab_automation_aktiv
       state: "on"
+    - condition: numeric_state
+      entity_id: sensor.pv_gesamtleistung
+      above: 1500
     - condition: time
       after: "07:00:00"
       before: "19:00:00"
@@ -24,18 +27,24 @@
       data:
         title: "Heizstab EIN"
         message: >
-          Solar-Überschuss {{ states('sensor.solar_ueberschuss') }} W →
+          Batterie {{ states('sensor.sn_XXXXXXXXXX_battery_soc_total') }}% —
+          PV {{ states('sensor.pv_gesamtleistung') }} W →
           Heizstab eingeschaltet.
   mode: single
 
 - id: heizstab_solar_aus
-  alias: "Heizstab AUS bei zu wenig Solar"
+  alias: "Heizstab AUS bei Akku unter 80% oder wenig PV"
   description: >
-    Schaltet Heizstab (Shelly) aus, wenn Solar-Überschuss unter 100W für 2 Minuten.
+    Schaltet Heizstab aus wenn Batterie unter 80% fällt oder PV unter 500W.
   trigger:
     - platform: numeric_state
-      entity_id: sensor.solar_ueberschuss
-      below: 100
+      entity_id: sensor.sn_XXXXXXXXXX_battery_soc_total
+      below: 80
+      for:
+        minutes: 2
+    - platform: numeric_state
+      entity_id: sensor.pv_gesamtleistung
+      below: 500
       for:
         minutes: 2
   condition:
@@ -50,7 +59,8 @@
       data:
         title: "Heizstab AUS"
         message: >
-          Solar-Überschuss {{ states('sensor.solar_ueberschuss') }} W →
+          Batterie {{ states('sensor.sn_XXXXXXXXXX_battery_soc_total') }}% —
+          PV {{ states('sensor.pv_gesamtleistung') }} W →
           Heizstab ausgeschaltet.
   mode: single
 
