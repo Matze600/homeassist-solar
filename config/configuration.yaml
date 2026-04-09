@@ -19,14 +19,6 @@ template:
           {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
             + states('sensor.sn_3015681731_pv_power') | float(0)) | round(0) }}
 
-      - name: "Solar Ueberschuss"
-        unique_id: solar_ueberschuss
-        unit_of_measurement: "W"
-        device_class: power
-        state_class: measurement
-        state: >
-          {{ states('sensor.sn_3015681731_metering_active_power_feed_l1') | float(0) | round(0) }}
-
       - name: "Grundlast"
         unique_id: grundlast
         unit_of_measurement: "W"
