@@ -110,3 +110,106 @@ views:
                 name: Panel 4
                 min: 0
                 max: 400
+
+  - title: Energie & Heizstab
+    path: solar-energie
+    icon: mdi:lightning-bolt
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Energiefluss"
+          - type: horizontal-stack
+            cards:
+              - type: gauge
+                entity: sensor.pv_gesamtleistung
+                name: PV Gesamt
+                min: 0
+                max: 6600
+                severity:
+                  green: 3000
+                  yellow: 1000
+                  red: 0
+              - type: gauge
+                entity: sensor.hausverbrauch
+                name: Verbrauch
+                min: 0
+                max: 6600
+                severity:
+                  green: 0
+                  yellow: 1500
+                  red: 3000
+              - type: gauge
+                entity: sensor.solar_ueberschuss
+                name: Überschuss
+                min: 0
+                max: 6600
+                severity:
+                  green: 1000
+                  yellow: 300
+                  red: 0
+              - type: gauge
+                entity: sensor.grundlast
+                name: Grundlast
+                min: 0
+                max: 3000
+                severity:
+                  green: 0
+                  yellow: 500
+                  red: 1500
+          - type: entities
+            title: Leistung im Detail
+            entities:
+              - entity: sensor.pv_gesamtleistung
+                name: PV Gesamtleistung
+                icon: mdi:solar-power
+              - entity: sensor.hausverbrauch
+                name: Hausverbrauch gesamt
+                icon: mdi:home-lightning-bolt
+              - entity: sensor.grundlast
+                name: Grundlast (Netzbezug)
+                icon: mdi:home-import-outline
+              - entity: sensor.solar_ueberschuss
+                name: Einspeisung / Überschuss
+                icon: mdi:transmission-tower-export
+              - entity: sensor.sn_XXXXXXXXXX_grid_power
+                name: Netzleistung (SMA)
+                icon: mdi:transmission-tower
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: "## Heizstab Steuerung (Shelly)"
+          - type: entities
+            entities:
+              - entity: input_boolean.heizstab_automation_aktiv
+                name: Solar-Automation aktiv
+                toggle: true
+              - entity: switch.shelly_heizstab
+                name: Heizstab Schalter (Shelly)
+              - entity: binary_sensor.heizstab_aktiv_bl_net
+                name: UVR1611 Ausgang 7 (Monitoring)
+          - type: markdown
+            content: >
+              **Automation:** Schaltet Shelly EIN wenn Solar-Überschuss > 500 W für 5 Min.
+              AUS bei < 100 W für 2 Min. oder um 19:00 Uhr.
+
+              Überschuss: **{{ states('sensor.solar_ueberschuss') }} W**
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Heizstab EIN
+                icon: mdi:water-boiler
+                tap_action:
+                  action: call-service
+                  service: switch.turn_on
+                  service_data:
+                    entity_id: switch.shelly_heizstab
+              - type: button
+                name: Heizstab AUS
+                icon: mdi:water-boiler-off
+                tap_action:
+                  action: call-service
+                  service: switch.turn_off
+                  service_data:
+                    entity_id: switch.shelly_heizstab

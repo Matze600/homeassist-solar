@@ -1,1 +1,67 @@
-[]
+- id: heizstab_solar_ein
+  alias: "Heizstab EIN bei Solar-Überschuss"
+  description: >
+    Schaltet Heizstab (Shelly) ein, wenn mindestens 500W Solarüberschuss
+    für 5 Minuten anliegen.
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.solar_ueberschuss
+      above: 500
+      for:
+        minutes: 5
+  condition:
+    - condition: state
+      entity_id: input_boolean.heizstab_automation_aktiv
+      state: "on"
+    - condition: time
+      after: "07:00:00"
+      before: "19:00:00"
+  action:
+    - service: switch.turn_on
+      target:
+        entity_id: switch.shelly_heizstab
+    - service: notify.persistent_notification
+      data:
+        title: "Heizstab EIN"
+        message: >
+          Solar-Überschuss {{ states('sensor.solar_ueberschuss') }} W →
+          Heizstab eingeschaltet.
+  mode: single
+
+- id: heizstab_solar_aus
+  alias: "Heizstab AUS bei zu wenig Solar"
+  description: >
+    Schaltet Heizstab (Shelly) aus, wenn Solar-Überschuss unter 100W für 2 Minuten.
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.solar_ueberschuss
+      below: 100
+      for:
+        minutes: 2
+  condition:
+    - condition: state
+      entity_id: input_boolean.heizstab_automation_aktiv
+      state: "on"
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.shelly_heizstab
+    - service: notify.persistent_notification
+      data:
+        title: "Heizstab AUS"
+        message: >
+          Solar-Überschuss {{ states('sensor.solar_ueberschuss') }} W →
+          Heizstab ausgeschaltet.
+  mode: single
+
+- id: heizstab_abend_aus
+  alias: "Heizstab AUS nach 19:00 Uhr"
+  description: "Sicherstellt dass der Heizstab nach 19 Uhr immer aus ist."
+  trigger:
+    - platform: time
+      at: "19:00:00"
+  action:
+    - service: switch.turn_off
+      target:
+        entity_id: switch.shelly_heizstab
+  mode: single

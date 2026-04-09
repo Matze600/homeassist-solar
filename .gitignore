@@ -1,5 +1,7 @@
 # Home Assistant - sensible Daten
-config/.storage/
+# .storage: nur Lovelace-Dashboards versionieren, den Rest ignorieren
+config/.storage/*
+!config/.storage/lovelace*
 config/.cloud/
 config/secrets.yaml
 config/known_devices.yaml
@@ -20,6 +22,10 @@ config/OZW_Log.txt
 # HACS - wird automatisch installiert
 config/custom_components/hacs/
 config/custom_components/hoymiles_wifi/
+
+# Python
+**/__pycache__/
+**/*.pyc
 
 # Mosquitto - Laufzeitdaten
 mosquitto/data/

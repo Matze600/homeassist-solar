@@ -6,6 +6,71 @@ default_config:
 frontend:
   themes: !include_dir_merge_named themes
 
+# blnet: direkte Integration deaktiviert — Proxy unter localhost:8765 übernimmt
+# Berechnete Solar-Sensoren
+template:
+  - sensor:
+      - name: "PV Gesamtleistung"
+        unique_id: pv_gesamtleistung
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
+            + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0)) | round(0) }}
+
+      - name: "Hausverbrauch"
+        unique_id: hausverbrauch
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {% set pv = states('sensor.wechselrichter_ac_leistung') | float(0)
+                    + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0) %}
+          {% set grid = states('sensor.sn_XXXXXXXXXX_grid_power') | float(0) %}
+          {{ ([pv - grid, 0] | max) | round(0) }}
+
+      - name: "Solar Ueberschuss"
+        unique_id: solar_ueberschuss
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        state: >
+          {{ ([states('sensor.sn_XXXXXXXXXX_grid_power') | float(0), 0] | max) | round(0) }}
+
+      - name: "Grundlast"
+        unique_id: grundlast
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        icon: mdi:home-import-outline
+        state: >
+          {{ ([-states('sensor.sn_XXXXXXXXXX_grid_power') | float(0), 0] | max) | round(0) }}
+
+# Manuelle Steuerung Heizstab-Automation
+input_boolean:
+  heizstab_automation_aktiv:
+    name: Heizstab Solar-Automation
+    icon: mdi:water-boiler-auto
+
+# BL-Net Monitoring: Ausgang 7 (Heizstab) Zustandsanzeige über Proxy
+rest:
+  - resource: "http://localhost:8765/blnet"
+    scan_interval: 120
+    sensor:
+      - name: "BL-Net Ausgang 7 Zustand"
+        unique_id: blnet_ausgang7_zustand
+        value_template: >
+          {{ value_json.switches.digital_07.state | default('unbekannt') }}
+        icon: mdi:water-boiler
+
+    binary_sensor:
+      - name: "Heizstab aktiv (BL-Net)"
+        unique_id: blnet_heizstab_aktiv
+        value_template: >
+          {{ value_json.switches.digital_07.state == 'on' }}
+        device_class: running
+
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml

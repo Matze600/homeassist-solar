@@ -1,0 +1,357 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.solar",
+  "data": {
+    "config": {
+      "title": "Solar",
+      "views": [
+        {
+          "title": "Übersicht",
+          "path": "solar-uebersicht",
+          "icon": "mdi:solar-power",
+          "cards": [
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "## Hoymiles HMS-1600-4T"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.wechselrichter_ac_leistung",
+                  "name": "Aktuelle Leistung",
+                  "min": 0,
+                  "max": 1600,
+                  "severity": {
+                    "green": 800,
+                    "yellow": 400,
+                    "red": 0
+                  }
+                },
+                {
+                  "type": "glance",
+                  "show_name": true,
+                  "title": "Tagesertrag pro Panel",
+                  "entities": [
+                    {
+                      "entity": "sensor.wechselrichter_port_1_dc_tagesenergie",
+                      "name": "Port 1"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_port_2_dc_tagesenergie",
+                      "name": "Port 2"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_port_3_dc_tagesenergie",
+                      "name": "Port 3"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_port_4_dc_tagesenergie",
+                      "name": "Port 4"
+                    }
+                  ]
+                },
+                {
+                  "type": "glance",
+                  "show_name": true,
+                  "title": "Gesamtertrag pro Panel",
+                  "entities": [
+                    {
+                      "entity": "sensor.wechselrichter_port_1_dc_gesamtenergie",
+                      "name": "Port 1"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_port_2_dc_gesamtenergie",
+                      "name": "Port 2"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_port_3_dc_gesamtenergie",
+                      "name": "Port 3"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_port_4_dc_gesamtenergie",
+                      "name": "Port 4"
+                    }
+                  ]
+                },
+                {
+                  "type": "entities",
+                  "title": "Details",
+                  "entities": [
+                    {
+                      "entity": "sensor.wechselrichter_temperatur",
+                      "name": "Temperatur"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_netzspannung",
+                      "name": "Netzspannung"
+                    },
+                    {
+                      "entity": "sensor.wechselrichter_netzfrequenz",
+                      "name": "Netzfrequenz"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "## SMA Wechselrichter"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.sn_XXXXXXXXXX_pv_power",
+                  "name": "PV Leistung",
+                  "min": 0,
+                  "max": 5000,
+                  "severity": {
+                    "green": 2500,
+                    "yellow": 1000,
+                    "red": 0
+                  }
+                },
+                {
+                  "type": "entities",
+                  "title": "Ertrag & Status",
+                  "entities": [
+                    {
+                      "entity": "sensor.sn_XXXXXXXXXX_daily_yield",
+                      "name": "Tagesertrag"
+                    },
+                    {
+                      "entity": "sensor.sn_XXXXXXXXXX_total_yield",
+                      "name": "Gesamtertrag"
+                    },
+                    {
+                      "entity": "sensor.sn_XXXXXXXXXX_grid_power",
+                      "name": "Netzleistung"
+                    },
+                    {
+                      "entity": "sensor.sn_XXXXXXXXXX_status",
+                      "name": "Status"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "# PV Gesamt: {{ (states('sensor.wechselrichter_ac_leistung') | float(0) + states('sensor.sn_XXXXXXXXXX_pv_power') |                                                                           float(0)) | round(0) }} W\n"
+                },
+                {
+                  "type": "gauge",
+                  "entity": "sensor.wechselrichter_ac_leistung",
+                  "name": "Gesamtleistung Hoymiles",
+                  "min": 0,
+                  "max": 1600,
+                  "needle": true
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.wechselrichter_port_1_dc_leistung",
+                      "name": "Panel 1",
+                      "min": 0,
+                      "max": 400
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.wechselrichter_port_2_dc_leistung",
+                      "name": "Panel 2",
+                      "min": 0,
+                      "max": 400
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.wechselrichter_port_3_dc_leistung",
+                      "name": "Panel 3",
+                      "min": 0,
+                      "max": 400
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.wechselrichter_port_4_dc_leistung",
+                      "name": "Panel 4",
+                      "min": 0,
+                      "max": 400
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Energie & Heizstab",
+          "path": "solar-energie",
+          "icon": "mdi:lightning-bolt",
+          "cards": [
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "## Energiefluss"
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.pv_gesamtleistung",
+                      "name": "PV Gesamt",
+                      "min": 0,
+                      "max": 6600,
+                      "severity": {
+                        "green": 3000,
+                        "yellow": 1000,
+                        "red": 0
+                      }
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.hausverbrauch",
+                      "name": "Verbrauch",
+                      "min": 0,
+                      "max": 6600,
+                      "severity": {
+                        "green": 0,
+                        "yellow": 1500,
+                        "red": 3000
+                      }
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.solar_ueberschuss",
+                      "name": "Überschuss",
+                      "min": 0,
+                      "max": 6600,
+                      "severity": {
+                        "green": 1000,
+                        "yellow": 300,
+                        "red": 0
+                      }
+                    },
+                    {
+                      "type": "gauge",
+                      "entity": "sensor.grundlast",
+                      "name": "Grundlast",
+                      "min": 0,
+                      "max": 3000,
+                      "severity": {
+                        "green": 0,
+                        "yellow": 500,
+                        "red": 1500
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "entities",
+                  "title": "Leistung im Detail",
+                  "entities": [
+                    {
+                      "entity": "sensor.pv_gesamtleistung",
+                      "name": "PV Gesamtleistung",
+                      "icon": "mdi:solar-power"
+                    },
+                    {
+                      "entity": "sensor.hausverbrauch",
+                      "name": "Hausverbrauch gesamt",
+                      "icon": "mdi:home-lightning-bolt"
+                    },
+                    {
+                      "entity": "sensor.grundlast",
+                      "name": "Grundlast (Netzbezug)",
+                      "icon": "mdi:home-import-outline"
+                    },
+                    {
+                      "entity": "sensor.solar_ueberschuss",
+                      "name": "Einspeisung / Überschuss",
+                      "icon": "mdi:transmission-tower-export"
+                    },
+                    {
+                      "entity": "sensor.sn_XXXXXXXXXX_grid_power",
+                      "name": "Netzleistung (SMA)",
+                      "icon": "mdi:transmission-tower"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "vertical-stack",
+              "cards": [
+                {
+                  "type": "markdown",
+                  "content": "## Heizstab Steuerung (Shelly)"
+                },
+                {
+                  "type": "entities",
+                  "entities": [
+                    {
+                      "entity": "input_boolean.heizstab_automation_aktiv",
+                      "name": "Solar-Automation aktiv",
+                      "toggle": true
+                    },
+                    {
+                      "entity": "switch.shelly_heizstab",
+                      "name": "Heizstab Schalter (Shelly)"
+                    },
+                    {
+                      "entity": "binary_sensor.heizstab_aktiv_bl_net",
+                      "name": "UVR1611 Ausgang 7 (Monitoring)"
+                    }
+                  ]
+                },
+                {
+                  "type": "markdown",
+                  "content": "**Automation:** Schaltet Shelly EIN wenn Solar-Überschuss > 500 W für 5 Min. AUS bei < 100 W für 2 Min. oder um 19:00 Uhr.\n\nÜberschuss: **{{ states('sensor.solar_ueberschuss') }} W**"
+                },
+                {
+                  "type": "horizontal-stack",
+                  "cards": [
+                    {
+                      "type": "button",
+                      "name": "Heizstab EIN",
+                      "icon": "mdi:water-boiler",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "switch.turn_on",
+                        "service_data": {
+                          "entity_id": "switch.shelly_heizstab"
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "name": "Heizstab AUS",
+                      "icon": "mdi:water-boiler-off",
+                      "tap_action": {
+                        "action": "call-service",
+                        "service": "switch.turn_off",
+                        "service_data": {
+                          "entity_id": "switch.shelly_heizstab"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
