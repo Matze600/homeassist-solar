@@ -45,7 +45,7 @@ template:
         state_class: measurement
         icon: mdi:home-import-outline
         state: >
-          {{ ([-states('sensor.sn_XXXXXXXXXX_grid_power') | float(0), 0] | max) | round(0) }}
+          {{ ([-(states('sensor.sn_XXXXXXXXXX_grid_power') | float(0)), 0] | max) | round(0) }}
 
 # Manuelle Steuerung Heizstab-Automation
 input_boolean:
