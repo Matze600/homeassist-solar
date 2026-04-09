@@ -19,18 +19,6 @@ template:
           {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
             + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0)) | round(0) }}
 
-      - name: "Hausverbrauch"
-        unique_id: hausverbrauch
-        unit_of_measurement: "W"
-        device_class: power
-        state_class: measurement
-        state: >
-          {% set pv = states('sensor.wechselrichter_ac_leistung') | float(0)
-                    + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0) %}
-          {% set bezug = states('sensor.sn_XXXXXXXXXX_metering_active_power_draw_l1') | float(0) %}
-          {% set einspeisung = states('sensor.sn_XXXXXXXXXX_metering_active_power_feed_l1') | float(0) %}
-          {{ (pv + bezug - einspeisung) | round(0) }}
-
       - name: "Solar Ueberschuss"
         unique_id: solar_ueberschuss
         unit_of_measurement: "W"
