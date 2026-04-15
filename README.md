@@ -104,6 +104,103 @@ Solar-Dashboard mit zwei Views:
 - Detailliste aller Leistungswerte
 - Heizstab-Steuerung: Automation-Toggle, Shelly-Schalter, BL-Net Monitoring
 
+## Fernzugriff via Cloudflare Tunnel
+
+Home Assistant ist von außen erreichbar über `https://ha.alab247.de` — ohne offene Ports im Router, gesichert durch Cloudflare Zero Trust Access.
+
+### Architektur
+
+```
+Heimnetz  → http://192.168.178.71:8123   → kein Login (trusted_network)
+Internet  → https://ha.alab247.de        → Cloudflare Access → CF Tunnel → HA
+```
+
+### Komponenten
+
+| Komponente | Beschreibung |
+|---|---|
+| **cloudflared** | Systemdienst, baut ausgehenden Tunnel zu Cloudflare auf |
+| **Cloudflare Access** | Zero Trust Schutz — nur autorisierte Nutzer dürfen durch |
+| **Service Token** | Statischer Key für die HA Companion App (Custom Headers) |
+| **E-Mail OTP** | Einmaliger Login im Browser, Session 1 Monat gültig |
+
+### cloudflared installieren
+
+```bash
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /tmp/cloudflared
+chmod +x /tmp/cloudflared && sudo mv /tmp/cloudflared /usr/local/bin/cloudflared
+
+cloudflared tunnel login
+cloudflared tunnel create homeassist
+cloudflared tunnel route dns homeassist ha.example.de
+```
+
+Config `/etc/cloudflared/config.yml`:
+
+```yaml
+tunnel: <TUNNEL-ID>
+credentials-file: /etc/cloudflared/<TUNNEL-ID>.json
+
+ingress:
+  - hostname: ha.example.de
+    service: http://localhost:8123
+  - service: http_status:404
+```
+
+```bash
+sudo cloudflared service install
+sudo systemctl enable --now cloudflared
+```
+
+### Home Assistant konfigurieren
+
+In `config/configuration.yaml`:
+
+```yaml
+homeassistant:
+  auth_providers:
+    - type: trusted_networks
+      trusted_networks:
+        - 192.168.178.0/24
+      allow_bypass_login: true
+    - type: homeassistant
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+```
+
+### Cloudflare Access einrichten
+
+1. **Zero Trust → Access → Applications → Add → Self-hosted**
+   - Domain: `ha.example.de`
+   - Session Duration: `1 month`
+
+2. **Policies** (Reihenfolge beachten):
+
+| Policy | Action | Rule |
+|---|---|---|
+| `Bypass Token` | Bypass | Service Token (für Companion App) |
+| `Mein Zugang` | Allow | Emails → deine@email.de |
+| `Block All` | Block | Everyone |
+
+3. **Service Token** anlegen: Zero Trust → Access → Service Auth → Service Tokens → Create
+   - Token-Werte sicher speichern (werden nur einmal angezeigt)
+   - `CF-Access-Client-Id` und `CF-Access-Client-Secret` in der Companion App als Custom Headers eintragen
+
+### HA Companion App (Android)
+
+- External URL: `https://ha.example.de`
+- Beim ersten Start: CF E-Mail OTP einmalig bestätigen → danach 1 Monat gültig
+
+### Hinweise Sicherheit
+
+- Cloudflared-Credentials liegen in `/etc/cloudflared/` — **nicht** ins Repository committen
+- Service Token sicher aufbewahren (z.B. `~/.config/cf-access/`) — ebenfalls nicht committen
+- Mosquitto ist ohne Auth konfiguriert — nur im lokalen Netz erreichbar, nicht über den Tunnel
+
 ## Installation
 
 ### Voraussetzungen
