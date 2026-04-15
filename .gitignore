@@ -30,3 +30,7 @@ config/custom_components/hoymiles_wifi/
 # Mosquitto - Laufzeitdaten
 mosquitto/data/
 mosquitto/log/
+
+# Cloudflare Tunnel - Credentials (niemals committen!)
+*.json
+.cloudflared/
