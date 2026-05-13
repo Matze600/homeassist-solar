@@ -1,77 +1,110 @@
-- id: heizstab_solar_ein
-  alias: "Heizstab EIN bei vollem Akku und PV-Überschuss"
+# ---------------------------------------------------------------------------
+# Heizstab Phasensteuerung (3x Shelly Plus 1PM, L1/L2/L3)
+# Entity-Namen nach Installation am 13.05.2026 anpassen!
+# ---------------------------------------------------------------------------
+
+- id: heizstab_phasensteuerung
+  alias: "Heizstab Phasensteuerung (Solarüberschuss)"
   description: >
-    Schaltet Heizstab (Shelly) ein, wenn Batterie >= 90% und PV > 1500W
-    für 5 Minuten — dann ist genug Überschuss für den Heizstab (~2kW).
+    Steuert 1–3 Phasen des Heizstabs je nach Solarüberschuss und Batterie-SOC.
+    Läuft alle 2 Minuten zwischen 07:00 und 19:00 Uhr.
+    Schwellen: >3500W→3Ph, >2000W→2Ph, >800W→1Ph, Batterie<80%→Aus
   trigger:
-    - platform: numeric_state
-      entity_id: sensor.sn_XXXXXXXXXX_battery_soc_total
-      above: 90
-      for:
-        minutes: 5
+    - platform: time_pattern
+      minutes: "/2"
+  condition:
+    - condition: state
+      entity_id: input_boolean.heizstab_automation_aktiv
+      state: "on"
+    - condition: time
+      after: "07:00:00"
+      before: "19:00:00"
+  action:
+    - variables:
+        ueberschuss: "{{ states('sensor.solar_ueberschuss') | float(0) }}"
+        batterie: "{{ states('sensor.sn_XXXXXXXXXX_battery_soc_total') | float(0) }}"
+        aktuelle_phasen: "{{ states('input_number.heizstab_aktive_phasen') | int }}"
+        ziel_phasen: >
+          {% if batterie < 80 %}
+            0
+          {% elif ueberschuss > 3500 %}
+            3
+          {% elif ueberschuss > 2000 %}
+            2
+          {% elif ueberschuss > 800 %}
+            1
+          {% else %}
+            0
+          {% endif %}
+    - if: "{{ ziel_phasen | int != aktuelle_phasen }}"
+      then:
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.heizstab_rotation
+          data:
+            value: "{{ (states('input_number.heizstab_rotation') | int + 1) % 3 }}"
+        - service: script.heizstab_phasen_schalten
+          data:
+            ziel_phasen: "{{ ziel_phasen | int }}"
+        - service: notify.persistent_notification
+          data:
+            title: "Heizstab Phasen geändert"
+            message: >
+              {{ aktuelle_phasen }} → {{ ziel_phasen }} Phase(n) |
+              PV: {{ states('sensor.pv_gesamtleistung') }} W |
+              Überschuss: {{ ueberschuss | round(0) }} W |
+              Batterie: {{ batterie | round(0) }}%
+  mode: single
+
+- id: heizstab_1phase_rotation
+  alias: "Heizstab 1-Phasen Rotation (alle 30 Min)"
+  description: "Rotiert die aktive Phase bei 1-Phasen-Betrieb für gleichmäßige Belastung des Heizstabs"
+  trigger:
+    - platform: time_pattern
+      minutes: "/30"
   condition:
     - condition: state
       entity_id: input_boolean.heizstab_automation_aktiv
       state: "on"
     - condition: numeric_state
-      entity_id: sensor.pv_gesamtleistung
-      above: 1500
+      entity_id: input_number.heizstab_aktive_phasen
+      above: 0.5
+      below: 1.5
     - condition: time
       after: "07:00:00"
       before: "19:00:00"
   action:
-    - service: switch.turn_on
+    - service: input_number.set_value
       target:
-        entity_id: switch.shelly_heizstab
-    - service: notify.persistent_notification
+        entity_id: input_number.heizstab_rotation
       data:
-        title: "Heizstab EIN"
-        message: >
-          Batterie {{ states('sensor.sn_XXXXXXXXXX_battery_soc_total') }}% —
-          PV {{ states('sensor.pv_gesamtleistung') }} W →
-          Heizstab eingeschaltet.
-  mode: single
-
-- id: heizstab_solar_aus
-  alias: "Heizstab AUS bei Akku unter 80% oder wenig PV"
-  description: >
-    Schaltet Heizstab aus wenn Batterie unter 80% fällt oder PV unter 500W.
-  trigger:
-    - platform: numeric_state
-      entity_id: sensor.sn_XXXXXXXXXX_battery_soc_total
-      below: 80
-      for:
-        minutes: 2
-    - platform: numeric_state
-      entity_id: sensor.pv_gesamtleistung
-      below: 500
-      for:
-        minutes: 2
-  condition:
-    - condition: state
-      entity_id: input_boolean.heizstab_automation_aktiv
-      state: "on"
-  action:
-    - service: switch.turn_off
-      target:
-        entity_id: switch.shelly_heizstab
-    - service: notify.persistent_notification
+        value: "{{ (states('input_number.heizstab_rotation') | int + 1) % 3 }}"
+    - service: script.heizstab_phasen_schalten
       data:
-        title: "Heizstab AUS"
-        message: >
-          Batterie {{ states('sensor.sn_XXXXXXXXXX_battery_soc_total') }}% —
-          PV {{ states('sensor.pv_gesamtleistung') }} W →
-          Heizstab ausgeschaltet.
+        ziel_phasen: 1
   mode: single
 
 - id: heizstab_abend_aus
   alias: "Heizstab AUS nach 19:00 Uhr"
-  description: "Sicherstellt dass der Heizstab nach 19 Uhr immer aus ist."
+  description: "Alle Phasen nach 19 Uhr ausschalten"
   trigger:
     - platform: time
       at: "19:00:00"
   action:
-    - service: switch.turn_off
-      target:
-        entity_id: switch.shelly_heizstab
+    - service: script.heizstab_phasen_schalten
+      data:
+        ziel_phasen: 0
+  mode: single
+
+- id: heizstab_automation_deaktiviert
+  alias: "Heizstab AUS wenn Automation deaktiviert"
+  description: "Alle Phasen sofort ausschalten wenn Automation manuell deaktiviert wird"
+  trigger:
+    - platform: state
+      entity_id: input_boolean.heizstab_automation_aktiv
+      to: "off"
+  action:
+    - service: script.heizstab_phasen_schalten
+      data:
+        ziel_phasen: 0
   mode: single

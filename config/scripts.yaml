@@ -1,0 +1,54 @@
+heizstab_phasen_schalten:
+  alias: "Heizstab: Phasen schalten"
+  description: "Schaltet L1/L2/L3 gemäß Zielanzahl und aktuellem Rotationsindex"
+  fields:
+    ziel_phasen:
+      description: "Ziel-Phasenanzahl (0–3)"
+      example: 2
+  sequence:
+    - variables:
+        rot: "{{ states('input_number.heizstab_rotation') | int }}"
+        l1_an: >
+          {{ (ziel_phasen == 3) or
+             (ziel_phasen == 2 and rot in [0, 2]) or
+             (ziel_phasen == 1 and rot == 0) }}
+        l2_an: >
+          {{ (ziel_phasen == 3) or
+             (ziel_phasen == 2 and rot in [0, 1]) or
+             (ziel_phasen == 1 and rot == 1) }}
+        l3_an: >
+          {{ (ziel_phasen == 3) or
+             (ziel_phasen == 2 and rot in [1, 2]) or
+             (ziel_phasen == 1 and rot == 2) }}
+    - if: "{{ l1_an }}"
+      then:
+        - service: switch.turn_on
+          target:
+            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+      else:
+        - service: switch.turn_off
+          target:
+            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+    - if: "{{ l2_an }}"
+      then:
+        - service: switch.turn_on
+          target:
+            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+      else:
+        - service: switch.turn_off
+          target:
+            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+    - if: "{{ l3_an }}"
+      then:
+        - service: switch.turn_on
+          target:
+            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+      else:
+        - service: switch.turn_off
+          target:
+            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.heizstab_aktive_phasen
+      data:
+        value: "{{ ziel_phasen }}"

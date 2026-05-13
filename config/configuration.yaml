@@ -28,11 +28,37 @@ template:
         state: >
           {{ states('sensor.sn_XXXXXXXXXX_metering_active_power_draw_l1') | float(0) | round(0) }}
 
+      - name: "Solarüberschuss"
+        unique_id: solar_ueberschuss
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        icon: mdi:solar-power
+        state: >
+          {{ [states('sensor.pv_gesamtleistung') | float(0) -
+              states('sensor.grundlast') | float(0), 0] | max | round(0) }}
+
 # Manuelle Steuerung Heizstab-Automation
 input_boolean:
   heizstab_automation_aktiv:
     name: Heizstab Solar-Automation
     icon: mdi:water-boiler-auto
+
+input_number:
+  heizstab_rotation:
+    name: Heizstab Rotationsindex
+    min: 0
+    max: 2
+    step: 1
+    mode: box
+    icon: mdi:rotate-right
+  heizstab_aktive_phasen:
+    name: Heizstab aktive Phasen
+    min: 0
+    max: 3
+    step: 1
+    mode: box
+    icon: mdi:sine-wave
 
 # BL-Net Monitoring: Ausgang 7 (Heizstab) Zustandsanzeige über Proxy
 rest:
