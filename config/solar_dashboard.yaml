@@ -56,7 +56,7 @@ views:
           - type: markdown
             content: "## SMA Wechselrichter"
           - type: gauge
-            entity: sensor.sn_XXXXXXXXXX_pv_power
+            entity: sensor.sma_pv_power
             name: PV Leistung
             min: 0
             max: 5000
@@ -67,13 +67,13 @@ views:
           - type: entities
             title: Ertrag & Status
             entities:
-              - entity: sensor.sn_XXXXXXXXXX_daily_yield
+              - entity: sensor.sma_daily_yield
                 name: Tagesertrag
-              - entity: sensor.sn_XXXXXXXXXX_total_yield
+              - entity: sensor.sma_total_yield
                 name: Gesamtertrag
-              - entity: sensor.sn_XXXXXXXXXX_grid_power
+              - entity: sensor.sma_grid_power
                 name: Netzleistung
-              - entity: sensor.sn_XXXXXXXXXX_status
+              - entity: sensor.sma_status
                 name: Status
 
       - type: vertical-stack
@@ -81,7 +81,7 @@ views:
           - type: markdown
             content: >
               # PV Gesamt: {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
-              + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0)) | round(0) }} W
+              + states('sensor.sma_pv_power') | float(0)) | round(0) }} W
           - type: gauge
             entity: sensor.wechselrichter_ac_leistung
             name: Gesamtleistung Hoymiles
@@ -131,7 +131,7 @@ views:
                   yellow: 2000
                   red: 0
               - type: gauge
-                entity: sensor.sn_XXXXXXXXXX_battery_soc_total
+                entity: sensor.sma_battery_soc_total
                 name: Batterie
                 min: 0
                 max: 100
@@ -169,10 +169,10 @@ views:
               - entity: sensor.solar_ueberschuss
                 name: Solarüberschuss
                 icon: mdi:transmission-tower-export
-              - entity: sensor.sn_XXXXXXXXXX_battery_soc_total
+              - entity: sensor.sma_battery_soc_total
                 name: Batterie SOC
                 icon: mdi:battery
-              - entity: sensor.sn_XXXXXXXXXX_grid_power
+              - entity: sensor.sma_grid_power
                 name: Netzleistung (SMA)
                 icon: mdi:transmission-tower
 
@@ -183,24 +183,21 @@ views:
           - type: entities
             title: Phasen L1 / L2 / L3
             entities:
-              - entity: switch.shellyplus1pm_xxxxxxxxxxxx
+              - entity: switch.heizstab_l1
                 name: Heizstab L1
                 icon: mdi:water-boiler
-              - entity: sensor.shellyplus1pm_xxxxxxxxxxxx_leistung
+              - entity: sensor.heizstab_l1_leistung
                 name: L1 Leistung
                 icon: mdi:lightning-bolt
-              - entity: switch.shellyplus1pm_xxxxxxxxxxxx
+              - entity: switch.heizstab_l2
                 name: Heizstab L2
                 icon: mdi:water-boiler
-              - entity: sensor.shellyplus1pm_xxxxxxxxxxxx_leistung
+              - entity: sensor.heizstab_l2_leistung
                 name: L2 Leistung
                 icon: mdi:lightning-bolt
-              - entity: switch.shellyplus1pm_xxxxxxxxxxxx
+              - entity: switch.heizstab_l3
                 name: Heizstab L3
                 icon: mdi:water-boiler
-              - entity: sensor.shellyplus1pm_xxxxxxxxxxxx_leistung
+              - entity: sensor.heizstab_l3_leistung
                 name: L3 Leistung
                 icon: mdi:lightning-bolt
-              - entity: binary_sensor.heizstab_aktiv_bl_net
-                name: UVR1611 Ausgang 7 (Monitoring)
-                icon: mdi:eye

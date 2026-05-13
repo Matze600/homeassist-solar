@@ -22,7 +22,7 @@
   action:
     - variables:
         ueberschuss: "{{ states('sensor.solar_ueberschuss') | float(0) }}"
-        batterie: "{{ states('sensor.sn_XXXXXXXXXX_battery_soc_total') | float(0) }}"
+        batterie: "{{ states('sensor.sma_battery_soc_total') | float(0) }}"
         aktuelle_phasen: "{{ states('input_number.heizstab_aktive_phasen') | int }}"
         ziel_phasen: >
           {% if batterie < 80 %}

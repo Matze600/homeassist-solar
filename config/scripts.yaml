@@ -24,29 +24,29 @@ heizstab_phasen_schalten:
       then:
         - service: switch.turn_on
           target:
-            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+            entity_id: switch.heizstab_l1
       else:
         - service: switch.turn_off
           target:
-            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+            entity_id: switch.heizstab_l1
     - if: "{{ l2_an }}"
       then:
         - service: switch.turn_on
           target:
-            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+            entity_id: switch.heizstab_l2
       else:
         - service: switch.turn_off
           target:
-            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+            entity_id: switch.heizstab_l2
     - if: "{{ l3_an }}"
       then:
         - service: switch.turn_on
           target:
-            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+            entity_id: switch.heizstab_l3
       else:
         - service: switch.turn_off
           target:
-            entity_id: switch.shellyplus1pm_xxxxxxxxxxxx
+            entity_id: switch.heizstab_l3
     - service: input_number.set_value
       target:
         entity_id: input_number.heizstab_aktive_phasen

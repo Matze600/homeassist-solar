@@ -6,7 +6,6 @@ default_config:
 frontend:
   themes: !include_dir_merge_named themes
 
-# blnet: direkte Integration deaktiviert — Proxy unter localhost:8765 übernimmt
 # Berechnete Solar-Sensoren
 template:
   - sensor:
@@ -17,7 +16,7 @@ template:
         state_class: measurement
         state: >
           {{ (states('sensor.wechselrichter_ac_leistung') | float(0)
-            + states('sensor.sn_XXXXXXXXXX_pv_power') | float(0)) | round(0) }}
+            + states('sensor.sma_pv_power') | float(0)) | round(0) }}
 
       - name: "Grundlast"
         unique_id: grundlast
@@ -26,7 +25,7 @@ template:
         state_class: measurement
         icon: mdi:home-import-outline
         state: >
-          {{ states('sensor.sn_XXXXXXXXXX_metering_active_power_draw_l1') | float(0) | round(0) }}
+          {{ states('sensor.sma_metering_active_power_draw_l1') | float(0) | round(0) }}
 
       - name: "Solarüberschuss"
         unique_id: solar_ueberschuss
@@ -59,24 +58,6 @@ input_number:
     step: 1
     mode: box
     icon: mdi:sine-wave
-
-# BL-Net Monitoring: Ausgang 7 (Heizstab) Zustandsanzeige über Proxy
-rest:
-  - resource: "http://localhost:8765/blnet"
-    scan_interval: 120
-    sensor:
-      - name: "BL-Net Ausgang 7 Zustand"
-        unique_id: blnet_ausgang7_zustand
-        value_template: >
-          {{ value_json.switches.digital_07.state | default('unbekannt') }}
-        icon: mdi:water-boiler
-
-    binary_sensor:
-      - name: "Heizstab aktiv (BL-Net)"
-        unique_id: blnet_heizstab_aktiv
-        value_template: >
-          {{ value_json.switches.digital_07.state == 'on' }}
-        device_class: running
 
 automation: !include automations.yaml
 script: !include scripts.yaml
