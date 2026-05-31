@@ -9,6 +9,12 @@ services:
     network_mode: host
     depends_on:
       - mosquitto
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8123/api/states/sensor.netzleistung -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA' | grep -v 'not_found' | grep -q 'state'"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
 
   mosquitto:
     container_name: mosquitto
@@ -31,4 +37,7 @@ services:
       - /home/home/homeassistant/evcc/data:/root/.evcc
     restart: unless-stopped
     depends_on:
-      - mosquitto
+      mosquitto:
+        condition: service_started
+      homeassistant:
+        condition: service_healthy
