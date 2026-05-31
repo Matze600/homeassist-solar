@@ -37,11 +37,34 @@ template:
           {{ [states('sensor.pv_gesamtleistung') | float(0) -
               states('sensor.grundlast') | float(0), 0] | max | round(0) }}
 
-# Manuelle Steuerung Heizstab-Automation
+      - name: "Netzleistung"
+        unique_id: netzleistung
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        icon: mdi:transmission-tower
+        state: >
+          {{ (states('sensor.sma_metering_power_absorbed') | float(0)
+            - states('sensor.sma_metering_power_supplied') | float(0)) | round(0) }}
+
+      - name: "Batterieleistung"
+        unique_id: batterieleistung
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        icon: mdi:battery-charging
+        state: >
+          {{ (states('sensor.sma_battery_power_charge_total') | float(0)
+            - states('sensor.sma_battery_power_discharge_total') | float(0)) | round(0) }}
+
+# Manuelle Steuerung Heizstab-Automation + Alexa-Trigger
 input_boolean:
   heizstab_automation_aktiv:
     name: Heizstab Solar-Automation
     icon: mdi:water-boiler-auto
+  pv_status_anfrage:
+    name: Alexa PV-Status Anfrage
+    icon: mdi:solar-power
 
 input_number:
   heizstab_rotation:

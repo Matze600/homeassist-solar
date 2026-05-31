@@ -21,6 +21,15 @@
         "mode": "storage",
         "require_admin": false,
         "show_in_sidebar": true
+      },
+      {
+        "id": "dashboard_evcc",
+        "show_in_sidebar": true,
+        "icon": "mdi:ev-station",
+        "title": "evcc",
+        "require_admin": false,
+        "mode": "storage",
+        "url_path": "dashboard-evcc"
       }
     ]
   }

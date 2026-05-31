@@ -108,3 +108,49 @@
       data:
         ziel_phasen: 0
   mode: single
+
+# ---------------------------------------------------------------------------
+# Alexa PV-Status Ansage
+# Trigger: input_boolean.pv_status_anfrage geht auf "on"
+# (wird über Alexa-Routine eingeschaltet)
+# ---------------------------------------------------------------------------
+
+- id: alexa_pv_status_ansage
+  alias: "Alexa: PV Status Ansage"
+  description: "Liest aktuelle Solarwerte vor wenn Alexa die Anfrage triggert"
+  trigger:
+    - platform: state
+      entity_id: input_boolean.pv_status_anfrage
+      to: "on"
+  action:
+    - service: notify.alexa_media
+      data:
+        target:
+          - media_player.anni_2
+          - media_player.mullers_echo_dot
+          - media_player.mullers_echo_dot_3
+          - media_player.kuche
+          - media_player.mullers_echo_studio
+        message: >
+          Solarstatus: Gesamterzeugung {{ states('sensor.pv_gesamtleistung') | int }} Watt.
+          {% if states('sensor.sma_battery_soc_total') | float(-1) >= 0 %}
+          Batterieladung {{ states('sensor.sma_battery_soc_total') | int }} Prozent.
+          {% endif %}
+          {% set ueberschuss = states('sensor.solar_ueberschuss') | int %}
+          {% if ueberschuss > 100 %}
+          Solarüberschuss {{ ueberschuss }} Watt.
+          {% else %}
+          Kein Solarüberschuss.
+          {% endif %}
+          {% set grundlast = states('sensor.grundlast') | int %}
+          {% if grundlast > 0 %}
+          Netzbezug {{ grundlast }} Watt.
+          {% else %}
+          Kein Netzbezug.
+          {% endif %}
+        data:
+          type: announce
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.pv_status_anfrage
+  mode: single

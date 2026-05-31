@@ -1,0 +1,186 @@
+# evcc - Electric Vehicle Charge Controller
+# Dokumentation: https://docs.evcc.io
+# UI: http://192.168.178.71:7070
+
+network:
+  schema: http
+  host: 0.0.0.0
+  port: 7070
+
+sponsortoken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJldmNjLmlvIiwic3ViIjoiTWF0emU2MDAiLCJleHAiOjE4NzM1NDQ0MDAsImlhdCI6MTc3ODkzNjQwMCwic3JjIjoiZ2gifQ.oN1-ZkaavvBG8p00c0kfzcMLRp3Tn-MCODWcXo8ANho
+
+log: info
+interval: 30s
+
+# ---------------------------------------------------------------------------
+# Stromzähler — via Home Assistant REST API
+# Umweg über HA weil WiFi kein Speedwire-Multicast weiterleitet
+# HA liest SMA direkt (WebConnect) und stellt Daten per HTTP bereit
+# ---------------------------------------------------------------------------
+meters:
+  # Grid-Meter: Netzleistung (positiv = Bezug, negativ = Einspeisung)
+  # Berechnet in HA: metering_power_absorbed - metering_power_supplied
+  - name: grid
+    type: custom
+    power:
+      source: http
+      uri: http://localhost:8123/api/states/sensor.netzleistung
+      headers:
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+      jq: '.state | tonumber'
+
+  # PV-Meter: Gesamterzeugung inkl. Hoymiles
+  - name: pv
+    type: custom
+    power:
+      source: http
+      uri: http://localhost:8123/api/states/sensor.pv_gesamtleistung
+      headers:
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+      jq: '.state | tonumber'
+
+  # Batterie-Meter: Leistung (positiv = laden, negativ = entladen) + SOC
+  - name: battery
+    type: custom
+    power:
+      source: http
+      uri: http://localhost:8123/api/states/sensor.batterieleistung
+      headers:
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+      jq: '.state | tonumber'
+    soc:
+      source: http
+      uri: http://localhost:8123/api/states/sensor.sma_battery_soc_total
+      headers:
+        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+      jq: '.state | tonumber'
+
+# ---------------------------------------------------------------------------
+# Ladegeräte (Easee — native Integration via Sponsor-Token)
+# ---------------------------------------------------------------------------
+chargers:
+  - name: wallbox_1_master
+    type: template
+    template: easee
+    user: matthias.mueller62@web.de
+    password: Easee32791@!
+    charger: EH4SEQ47
+    timeout: 20s
+
+  - name: wallbox_2
+    type: template
+    template: easee
+    user: matthias.mueller62@web.de
+    password: Easee32791@!
+    charger: EHTXSK3B
+    timeout: 20s
+
+  - name: wallbox_3_aussen
+    type: template
+    template: easee
+    user: matthias.mueller62@web.de
+    password: Easee32791@!
+    charger: EHGR273F
+    timeout: 20s
+
+  # ---------------------------------------------------------------------------
+  # Heizstab (3x Shelly Plus 1PM) — je Phase als eigener Charger
+  # L1: 192.168.178.86 | L2: 192.168.178.91 | L3: 192.168.178.94
+  # ---------------------------------------------------------------------------
+  - name: heizstab_l1
+    type: template
+    template: shelly
+    host: 192.168.178.86
+
+  - name: heizstab_l2
+    type: template
+    template: shelly
+    host: 192.168.178.91
+
+  - name: heizstab_l3
+    type: template
+    template: shelly
+    host: 192.168.178.94
+
+# ---------------------------------------------------------------------------
+# Stromtarif (Awattar = EPEX Spot Deutschland, Tagespreise)
+# Rabot basiert ebenfalls auf EPEX Spot → günstige Stunden stimmen überein
+# ---------------------------------------------------------------------------
+tariffs:
+  currency: EUR
+  grid:
+    type: awattar
+    region: de
+
+# ---------------------------------------------------------------------------
+# Standort & Batterie-Strategie
+# ---------------------------------------------------------------------------
+site:
+  title: "Solar Zuhause"
+  meters:
+    grid: grid
+    pv: pv
+    battery: battery
+  residualPower: 0
+  # prioritySoc und bufferSoc → in evcc UI unter Einstellungen konfigurieren
+
+# ---------------------------------------------------------------------------
+# Ladepunkte
+# ---------------------------------------------------------------------------
+loadpoints:
+  - title: "Wallbox Master"
+    charger: wallbox_1_master
+    mode: pv
+    enable:
+      delay: 1m      # 1 Minute Überschuss nötig bevor Laden startet
+    disable:
+      delay: 5m      # 5 Minuten Pause nötig bevor Laden stoppt
+
+  - title: "Wallbox 2"
+    charger: wallbox_2
+    mode: pv
+    enable:
+      delay: 1m
+    disable:
+      delay: 5m
+
+  - title: "Wallbox Außen"
+    charger: wallbox_3_aussen
+    mode: pv
+    enable:
+      delay: 1m
+    disable:
+      delay: 5m
+
+  - title: "Heizstab L1"
+    charger: heizstab_l1
+    mode: pv
+    enable:
+      delay: 1m
+    disable:
+      delay: 5m
+
+  - title: "Heizstab L2"
+    charger: heizstab_l2
+    mode: pv
+    enable:
+      delay: 1m
+    disable:
+      delay: 5m
+
+  - title: "Heizstab L3"
+    charger: heizstab_l3
+    mode: pv
+    enable:
+      delay: 1m
+    disable:
+      delay: 5m
+
+# ---------------------------------------------------------------------------
+# MQTT → Home Assistant Integration
+# evcc publisht alle Werte nach Mosquitto; HA kann darauf subscriben
+# ---------------------------------------------------------------------------
+mqtt:
+  broker: localhost:1883
+  topic: evcc
+  clientid: evcc

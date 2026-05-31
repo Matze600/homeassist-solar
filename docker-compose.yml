@@ -21,3 +21,14 @@ services:
     ports:
       - "1883:1883"
       - "9001:9001"
+
+  evcc:
+    container_name: evcc
+    image: evcc/evcc:latest
+    network_mode: host    # Pflicht für SMA Speedwire Multicast (UDP 9522)
+    volumes:
+      - /home/home/homeassistant/evcc/evcc.yaml:/etc/evcc.yaml
+      - /home/home/homeassistant/evcc/data:/root/.evcc
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
