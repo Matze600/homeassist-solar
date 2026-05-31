@@ -47,13 +47,13 @@ meters:
       uri: http://localhost:8123/api/states/sensor.batterieleistung
       headers:
         Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
-      jq: '.state | tonumber'
+      jq: '.state | try tonumber'
     soc:
       source: http
       uri: http://localhost:8123/api/states/sensor.sma_battery_soc_total
       headers:
         Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
-      jq: '.state | tonumber'
+      jq: '.state | try tonumber'
 
 # ---------------------------------------------------------------------------
 # Ladegeräte (Easee — native Integration via Sponsor-Token)

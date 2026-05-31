@@ -1,1 +1,22 @@
-{"version":1,"minor_version":1,"key":"lovelace.dashboard_evcc","data":{"config":{"views":[{"title":"evcc","path":"evcc","panel":true,"cards":[{"type":"webpage","url":"http://192.168.178.71:7070"}]}]}}}
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.dashboard_evcc",
+  "data": {
+    "config": {
+      "views": [
+        {
+          "title": "evcc",
+          "path": "evcc",
+          "cards": [
+            {
+              "type": "webpage",
+              "url": "http://192.168.178.71:7070",
+              "aspect_ratio": "16:9"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
