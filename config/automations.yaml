@@ -110,6 +110,152 @@
   mode: single
 
 # ---------------------------------------------------------------------------
+# Batterie-Priorität bei Billigstrom (Awattar ≤ 0 ct/kWh)
+# Pausiert Wallboxen + Heizstab damit PV-Überschuss in Batterie fließt.
+# Nur tagsüber sinnvoll (PV > 500 W), sonst würden wir billiges Netzladen stoppen.
+# ---------------------------------------------------------------------------
+
+- id: batterie_prioritaet_an
+  alias: "Batterie Priorität AN (Strompreis ≤ 0 ct/kWh)"
+  description: >
+    Stoppt alle evcc-Ladepunkte wenn Preis ≤ 0 ct, Batterie < 80%
+    und PV > 500 W. PV-Strom fließt dann in die Batterie.
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.evcc_strompreis_aktuell
+      below: 0.001
+    - platform: numeric_state
+      entity_id: sensor.sma_battery_soc_total
+      below: 80
+    - platform: numeric_state
+      entity_id: sensor.pv_gesamtleistung
+      above: 500
+  condition:
+    - condition: numeric_state
+      entity_id: sensor.evcc_strompreis_aktuell
+      below: 0.001
+    - condition: numeric_state
+      entity_id: sensor.sma_battery_soc_total
+      below: 80
+    - condition: numeric_state
+      entity_id: sensor.pv_gesamtleistung
+      above: 500
+    - condition: state
+      entity_id: input_boolean.batterie_prioritaet_aktiv
+      state: "off"
+  action:
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 1
+        mode: "off"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 2
+        mode: "off"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 3
+        mode: "off"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 4
+        mode: "off"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 5
+        mode: "off"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 6
+        mode: "off"
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.heizstab_automation_aktiv
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.batterie_prioritaet_aktiv
+    - service: notify.persistent_notification
+      data:
+        title: "Batterie Priorität aktiv"
+        message: >
+          Wallboxen + Heizstab pausiert – PV fließt in Batterie.
+          Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
+          Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
+          PV: {{ states('sensor.pv_gesamtleistung') | int }} W
+  mode: single
+
+- id: batterie_prioritaet_aus
+  alias: "Batterie Priorität AUS (Preis > 0 ct oder Batterie ≥ 80% oder kein PV)"
+  description: >
+    Stellt Wallboxen + Heizstab auf PV-Modus zurück wenn Preis wieder > 0 ct,
+    Batterie ≥ 80% oder PV unter 200 W fällt.
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.evcc_strompreis_aktuell
+      above: 0.001
+    - platform: numeric_state
+      entity_id: sensor.sma_battery_soc_total
+      above: 79.9
+    - platform: numeric_state
+      entity_id: sensor.pv_gesamtleistung
+      below: 200
+  condition:
+    - condition: or
+      conditions:
+        - condition: numeric_state
+          entity_id: sensor.evcc_strompreis_aktuell
+          above: 0.001
+        - condition: numeric_state
+          entity_id: sensor.sma_battery_soc_total
+          above: 79.9
+        - condition: numeric_state
+          entity_id: sensor.pv_gesamtleistung
+          below: 200
+    - condition: state
+      entity_id: input_boolean.batterie_prioritaet_aktiv
+      state: "on"
+  action:
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 1
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 2
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 3
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 4
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 5
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 6
+        mode: "pv"
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.heizstab_automation_aktiv
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.batterie_prioritaet_aktiv
+    - service: notify.persistent_notification
+      data:
+        title: "Batterie Priorität beendet"
+        message: >
+          Wallboxen + Heizstab wieder auf PV-Modus.
+          Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
+          Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
+          PV: {{ states('sensor.pv_gesamtleistung') | int }} W
+  mode: single
+
+# ---------------------------------------------------------------------------
 # Alexa PV-Status Ansage
 # Trigger: input_boolean.pv_status_anfrage geht auf "on"
 # (wird über Alexa-Routine eingeschaltet)

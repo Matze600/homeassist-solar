@@ -65,6 +65,9 @@ input_boolean:
   pv_status_anfrage:
     name: Alexa PV-Status Anfrage
     icon: mdi:solar-power
+  batterie_prioritaet_aktiv:
+    name: Batterie Priorität aktiv
+    icon: mdi:battery-charging-high
 
 input_number:
   heizstab_rotation:
@@ -81,6 +84,22 @@ input_number:
     step: 1
     mode: box
     icon: mdi:sine-wave
+
+# evcc REST-Sensor: aktueller Strompreis aus Awattar-Tarif
+sensor:
+  - platform: rest
+    name: "evcc Strompreis aktuell"
+    unique_id: evcc_tariff_grid
+    resource: "http://localhost:7070/api/state"
+    scan_interval: 60
+    value_template: "{{ value_json.tariffGrid | round(4) }}"
+    unit_of_measurement: "ct/kWh"
+
+# evcc Loadpoint-Modus setzen (POST /api/loadpoints/{loadpoint}/mode/{mode})
+rest_command:
+  evcc_loadpoint_mode:
+    url: "http://localhost:7070/api/loadpoints/{{ loadpoint }}/mode/{{ mode }}"
+    method: POST
 
 automation: !include automations.yaml
 script: !include scripts.yaml
