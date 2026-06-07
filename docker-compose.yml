@@ -28,6 +28,17 @@ services:
       - "1883:1883"
       - "9001:9001"
 
+  uni-meter:
+    container_name: uni-meter
+    image: sdeigm/uni-meter:latest
+    network_mode: host    # Pflicht für SMA Speedwire Multicast (UDP 9522)
+    volumes:
+      - /home/home/homeassistant/uni-meter/uni-meter.conf:/etc/uni-meter.conf
+    restart: unless-stopped
+    depends_on:
+      homeassistant:
+        condition: service_healthy
+
   evcc:
     container_name: evcc
     image: evcc/evcc:latest
