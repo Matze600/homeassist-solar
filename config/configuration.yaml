@@ -57,11 +57,13 @@ template:
           {{ (states('sensor.sma_battery_power_charge_total') | float(0)
             - states('sensor.sma_battery_power_discharge_total') | float(0)) | round(0) }}
 
-# Manuelle Steuerung Heizstab-Automation + Alexa-Trigger
+# Alexa-Trigger + Statusvariablen
 input_boolean:
-  heizstab_automation_aktiv:
-    name: Heizstab Solar-Automation
-    icon: mdi:water-boiler-auto
+  # heizstab_automation_aktiv: DEAKTIVIERT 2026-06-07 — SMA Ennexos übernimmt
+  # Referenz noch in automations.yaml (disabled) — bei Reaktivierung wieder einkommentieren
+  # heizstab_automation_aktiv:
+  #   name: Heizstab Solar-Automation
+  #   icon: mdi:water-boiler-auto
   pv_status_anfrage:
     name: Alexa PV-Status Anfrage
     icon: mdi:solar-power
@@ -69,21 +71,22 @@ input_boolean:
     name: Batterie Priorität aktiv
     icon: mdi:battery-charging-high
 
-input_number:
-  heizstab_rotation:
-    name: Heizstab Rotationsindex
-    min: 0
-    max: 2
-    step: 1
-    mode: box
-    icon: mdi:rotate-right
-  heizstab_aktive_phasen:
-    name: Heizstab aktive Phasen
-    min: 0
-    max: 3
-    step: 1
-    mode: box
-    icon: mdi:sine-wave
+# input_number Heizstab: DEAKTIVIERT 2026-06-07 — nur für HA-Phasensteuerung benötigt
+# input_number:
+#   heizstab_rotation:
+#     name: Heizstab Rotationsindex
+#     min: 0
+#     max: 2
+#     step: 1
+#     mode: box
+#     icon: mdi:rotate-right
+#   heizstab_aktive_phasen:
+#     name: Heizstab aktive Phasen
+#     min: 0
+#     max: 3
+#     step: 1
+#     mode: box
+#     icon: mdi:sine-wave
 
 # evcc REST-Sensor: aktueller Strompreis aus Awattar-Tarif
 sensor:
