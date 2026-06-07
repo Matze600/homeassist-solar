@@ -84,23 +84,25 @@ chargers:
     timeout: 20s
 
   # ---------------------------------------------------------------------------
-  # Heizstab (3x Shelly Plus 1PM) — je Phase als eigener Charger
+  # Heizstab (3x Shelly Plus 1PM) — DEAKTIVIERT 2026-06-07
+  # Steuerung jetzt via SMA Ennexos (dynamische Stromtarife)
+  # Zum Reaktivieren: Kommentarzeichen entfernen + loadpoints unten einkommentieren
   # L1: 192.168.178.86 | L2: 192.168.178.91 | L3: 192.168.178.94
   # ---------------------------------------------------------------------------
-  - name: heizstab_l1
-    type: template
-    template: shelly
-    host: 192.168.178.86
-
-  - name: heizstab_l2
-    type: template
-    template: shelly
-    host: 192.168.178.91
-
-  - name: heizstab_l3
-    type: template
-    template: shelly
-    host: 192.168.178.94
+  # - name: heizstab_l1
+  #   type: template
+  #   template: shelly
+  #   host: 192.168.178.86
+  #
+  # - name: heizstab_l2
+  #   type: template
+  #   template: shelly
+  #   host: 192.168.178.91
+  #
+  # - name: heizstab_l3
+  #   type: template
+  #   template: shelly
+  #   host: 192.168.178.94
 
 # ---------------------------------------------------------------------------
 # Stromtarif (Awattar = EPEX Spot Deutschland, Tagespreise)
@@ -152,29 +154,30 @@ loadpoints:
     disable:
       delay: 5m
 
-  - title: "Heizstab L1"
-    charger: heizstab_l1
-    mode: pv
-    enable:
-      delay: 1m
-    disable:
-      delay: 5m
-
-  - title: "Heizstab L2"
-    charger: heizstab_l2
-    mode: pv
-    enable:
-      delay: 1m
-    disable:
-      delay: 5m
-
-  - title: "Heizstab L3"
-    charger: heizstab_l3
-    mode: pv
-    enable:
-      delay: 1m
-    disable:
-      delay: 5m
+  # DEAKTIVIERT 2026-06-07 — Heizstab jetzt via SMA Ennexos
+  # - title: "Heizstab L1"
+  #   charger: heizstab_l1
+  #   mode: pv
+  #   enable:
+  #     delay: 1m
+  #   disable:
+  #     delay: 5m
+  #
+  # - title: "Heizstab L2"
+  #   charger: heizstab_l2
+  #   mode: pv
+  #   enable:
+  #     delay: 1m
+  #   disable:
+  #     delay: 5m
+  #
+  # - title: "Heizstab L3"
+  #   charger: heizstab_l3
+  #   mode: pv
+  #   enable:
+  #     delay: 1m
+  #   disable:
+  #     delay: 5m
 
 # ---------------------------------------------------------------------------
 # MQTT → Home Assistant Integration

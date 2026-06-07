@@ -1,6 +1,7 @@
 # ---------------------------------------------------------------------------
 # Heizstab Phasensteuerung (3x Shelly Plus 1PM, L1/L2/L3)
-# Entity-Namen nach Installation am 13.05.2026 anpassen!
+# DEAKTIVIERT 2026-06-07 — Steuerung jetzt via SMA Ennexos (dynamische Tarife)
+# Zum Reaktivieren: "- condition: template / value_template: '{{ false }}'" entfernen
 # ---------------------------------------------------------------------------
 
 - id: heizstab_phasensteuerung
@@ -13,6 +14,8 @@
     - platform: time_pattern
       minutes: "/2"
   condition:
+    - condition: template
+      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
     - condition: state
       entity_id: input_boolean.heizstab_automation_aktiv
       state: "on"
@@ -63,6 +66,8 @@
     - platform: time_pattern
       minutes: "/30"
   condition:
+    - condition: template
+      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
     - condition: state
       entity_id: input_boolean.heizstab_automation_aktiv
       state: "on"
@@ -90,6 +95,9 @@
   trigger:
     - platform: time
       at: "19:00:00"
+  condition:
+    - condition: template
+      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
   action:
     - service: script.heizstab_phasen_schalten
       data:
@@ -103,6 +111,9 @@
     - platform: state
       entity_id: input_boolean.heizstab_automation_aktiv
       to: "off"
+  condition:
+    - condition: template
+      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
   action:
     - service: script.heizstab_phasen_schalten
       data:
@@ -111,15 +122,17 @@
 
 # ---------------------------------------------------------------------------
 # Batterie-Priorität bei Billigstrom (Awattar ≤ 0 ct/kWh)
-# Pausiert Wallboxen + Heizstab damit PV-Überschuss in Batterie fließt.
-# Nur tagsüber sinnvoll (PV > 500 W), sonst würden wir billiges Netzladen stoppen.
+# DEAKTIVIERT 2026-06-07 — Batterie + Heizstab jetzt via SMA Ennexos gesteuert
+# Nur Wallboxen (lp1-3) verbleiben in evcc; lp4-6 Heizstab-Referenzen entfernt
+# Zum Reaktivieren: "- condition: template / value_template: '{{ false }}'" entfernen
 # ---------------------------------------------------------------------------
 
 - id: batterie_prioritaet_an
   alias: "Batterie Priorität AN (Strompreis ≤ 0 ct/kWh)"
   description: >
-    Stoppt alle evcc-Ladepunkte wenn Preis ≤ 0 ct, Batterie < 80%
+    Stoppt Wallbox-Ladepunkte wenn Preis ≤ 0 ct, Batterie < 80%
     und PV > 500 W. PV-Strom fließt dann in die Batterie.
+    (Heizstab lp4-6 entfernt — SMA Ennexos übernimmt)
   trigger:
     - platform: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
@@ -131,6 +144,8 @@
       entity_id: sensor.pv_gesamtleistung
       above: 500
   condition:
+    - condition: template
+      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
     - condition: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
       below: 0.001
@@ -156,21 +171,6 @@
       data:
         loadpoint: 3
         mode: "off"
-    - service: rest_command.evcc_loadpoint_mode
-      data:
-        loadpoint: 4
-        mode: "off"
-    - service: rest_command.evcc_loadpoint_mode
-      data:
-        loadpoint: 5
-        mode: "off"
-    - service: rest_command.evcc_loadpoint_mode
-      data:
-        loadpoint: 6
-        mode: "off"
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.heizstab_automation_aktiv
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.batterie_prioritaet_aktiv
@@ -178,7 +178,7 @@
       data:
         title: "Batterie Priorität aktiv"
         message: >
-          Wallboxen + Heizstab pausiert – PV fließt in Batterie.
+          Wallboxen pausiert – PV fließt in Batterie.
           Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
           Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
           PV: {{ states('sensor.pv_gesamtleistung') | int }} W
@@ -187,8 +187,9 @@
 - id: batterie_prioritaet_aus
   alias: "Batterie Priorität AUS (Preis > 0 ct oder Batterie ≥ 80% oder kein PV)"
   description: >
-    Stellt Wallboxen + Heizstab auf PV-Modus zurück wenn Preis wieder > 0 ct,
+    Stellt Wallboxen auf PV-Modus zurück wenn Preis wieder > 0 ct,
     Batterie ≥ 80% oder PV unter 200 W fällt.
+    (Heizstab lp4-6 entfernt — SMA Ennexos übernimmt)
   trigger:
     - platform: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
@@ -200,6 +201,8 @@
       entity_id: sensor.pv_gesamtleistung
       below: 200
   condition:
+    - condition: template
+      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
     - condition: or
       conditions:
         - condition: numeric_state
@@ -227,21 +230,6 @@
       data:
         loadpoint: 3
         mode: "pv"
-    - service: rest_command.evcc_loadpoint_mode
-      data:
-        loadpoint: 4
-        mode: "pv"
-    - service: rest_command.evcc_loadpoint_mode
-      data:
-        loadpoint: 5
-        mode: "pv"
-    - service: rest_command.evcc_loadpoint_mode
-      data:
-        loadpoint: 6
-        mode: "pv"
-    - service: input_boolean.turn_on
-      target:
-        entity_id: input_boolean.heizstab_automation_aktiv
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.batterie_prioritaet_aktiv
@@ -249,7 +237,7 @@
       data:
         title: "Batterie Priorität beendet"
         message: >
-          Wallboxen + Heizstab wieder auf PV-Modus.
+          Wallboxen wieder auf PV-Modus.
           Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
           Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
           PV: {{ states('sensor.pv_gesamtleistung') | int }} W
