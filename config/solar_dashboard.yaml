@@ -179,7 +179,7 @@ views:
       - type: vertical-stack
         cards:
           - type: markdown
-            content: "## Heizstab Status (gesteuert durch SMA)"
+            content: "## Heizstab Status (gesteuert durch SMA Ennexos)"
           - type: entities
             title: Phasen L1 / L2 / L3
             entities:
