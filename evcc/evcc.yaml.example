@@ -1,13 +1,15 @@
 # evcc - Electric Vehicle Charge Controller
 # Dokumentation: https://docs.evcc.io
 # UI: http://192.168.178.71:7070
+#
+# SETUP: Kopiere diese Datei nach evcc.yaml und trage deine Zugangsdaten ein.
 
 network:
   schema: http
   host: 0.0.0.0
   port: 7070
 
-sponsortoken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJldmNjLmlvIiwic3ViIjoiTWF0emU2MDAiLCJleHAiOjE4NzM1NDQ0MDAsImlhdCI6MTc3ODkzNjQwMCwic3JjIjoiZ2gifQ.oN1-ZkaavvBG8p00c0kfzcMLRp3Tn-MCODWcXo8ANho
+sponsortoken: YOUR_EVCC_SPONSOR_TOKEN
 
 log: info
 interval: 30s
@@ -26,7 +28,7 @@ meters:
       source: http
       uri: http://localhost:8123/api/states/sensor.netzleistung
       headers:
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+        Authorization: "Bearer YOUR_HA_BEARER_TOKEN"
       jq: '.state | tonumber? // 0'
 
   # PV-Meter: Gesamterzeugung inkl. Hoymiles
@@ -36,7 +38,7 @@ meters:
       source: http
       uri: http://localhost:8123/api/states/sensor.pv_gesamtleistung
       headers:
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+        Authorization: "Bearer YOUR_HA_BEARER_TOKEN"
       jq: '.state | tonumber? // 0'
 
   # Batterie-Meter: Leistung (positiv = laden, negativ = entladen) + SOC
@@ -46,13 +48,13 @@ meters:
       source: http
       uri: http://localhost:8123/api/states/sensor.batterieleistung
       headers:
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+        Authorization: "Bearer YOUR_HA_BEARER_TOKEN"
       jq: '.state | tonumber? // 0'
     soc:
       source: http
       uri: http://localhost:8123/api/states/sensor.sma_battery_soc_total
       headers:
-        Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+        Authorization: "Bearer YOUR_HA_BEARER_TOKEN"
       jq: '.state | tonumber? // null'
 
 # ---------------------------------------------------------------------------
@@ -62,46 +64,45 @@ chargers:
   - name: wallbox_1_master
     type: template
     template: easee
-    user: matthias.mueller62@web.de
-    password: Easee32791@!
-    charger: EH4SEQ47
+    user: YOUR_EASEE_EMAIL
+    password: YOUR_EASEE_PASSWORD
+    charger: YOUR_EASEE_CHARGER_ID_1
     timeout: 20s
 
   - name: wallbox_2
     type: template
     template: easee
-    user: matthias.mueller62@web.de
-    password: Easee32791@!
-    charger: EHTXSK3B
+    user: YOUR_EASEE_EMAIL
+    password: YOUR_EASEE_PASSWORD
+    charger: YOUR_EASEE_CHARGER_ID_2
     timeout: 20s
 
   - name: wallbox_3_aussen
     type: template
     template: easee
-    user: matthias.mueller62@web.de
-    password: Easee32791@!
-    charger: EHGR273F
+    user: YOUR_EASEE_EMAIL
+    password: YOUR_EASEE_PASSWORD
+    charger: YOUR_EASEE_CHARGER_ID_3
     timeout: 20s
 
   # ---------------------------------------------------------------------------
   # Heizstab (3x Shelly Plus 1PM) — reaktiviert 2026-06-14
   # Steuerung via evcc: pv-Modus normal, fast-Modus bei ≤0 ct/kWh (HA Automation)
-  # L1: 192.168.178.86 | L2: 192.168.178.91 | L3: 192.168.178.94
   # ---------------------------------------------------------------------------
   - name: heizstab_l1
     type: template
     template: shelly
-    host: 192.168.178.86
+    host: 192.168.178.XX  # IP Shelly L1
 
   - name: heizstab_l2
     type: template
     template: shelly
-    host: 192.168.178.91
+    host: 192.168.178.XX  # IP Shelly L2
 
   - name: heizstab_l3
     type: template
     template: shelly
-    host: 192.168.178.94
+    host: 192.168.178.XX  # IP Shelly L3
 
 # ---------------------------------------------------------------------------
 # Stromtarif (Awattar = EPEX Spot Deutschland, Tagespreise)

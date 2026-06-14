@@ -35,3 +35,11 @@ mosquitto/log/
 # Cloudflare Tunnel - Credentials (niemals committen!)
 *.json
 .cloudflared/
+
+# Sensible Konfiguration — nur .example Versionen committen
+evcc/evcc.yaml
+uni-meter/uni-meter.conf
+.env
+
+# evcc Laufzeitdaten
+evcc/data/

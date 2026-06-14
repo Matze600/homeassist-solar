@@ -5,7 +5,7 @@ uni-meter {
   input-devices {
     home-assistant {
       url          = "http://127.0.0.1:8123"
-      access-token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA"
+      access-token = "YOUR_HA_BEARER_TOKEN"
 
       power-phase-mode  = "mono-phase"
       energy-phase-mode = "mono-phase"
@@ -22,7 +22,7 @@ uni-meter {
       port          = 9522
       ttl           = 32
       send-interval = 1s
-      serial-number = 99000001
+      serial-number = YOUR_SERIAL_NUMBER   # beliebige eindeutige 32-Bit-Zahl
       susy-id       = 270
     }
   }

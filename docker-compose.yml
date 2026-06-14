@@ -10,7 +10,7 @@ services:
     depends_on:
       - mosquitto
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8123/api/states/sensor.netzleistung -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIxODdmY2E1ZmI1OWI0Yjc4ODhiMDgyMzAyOTU4YzU4ZSIsImlhdCI6MTc3ODc0NDYzOSwiZXhwIjoyMDk0MTA0NjM5fQ.boLqehzh-HI2I2q7J__cAFm3q2qjlP7QxIMPvOXlhUA' | grep -v 'not_found' | grep -q 'state'"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8123/api/states/sensor.netzleistung -H 'Authorization: Bearer ${HA_BEARER_TOKEN}' | grep -v 'not_found' | grep -q 'state'"]
       interval: 15s
       timeout: 10s
       retries: 20
