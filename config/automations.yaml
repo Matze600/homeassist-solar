@@ -121,18 +121,16 @@
   mode: single
 
 # ---------------------------------------------------------------------------
-# Batterie-Priorität bei Billigstrom (Awattar ≤ 0 ct/kWh)
-# DEAKTIVIERT 2026-06-07 — Batterie + Heizstab jetzt via SMA Ennexos gesteuert
-# Nur Wallboxen (lp1-3) verbleiben in evcc; lp4-6 Heizstab-Referenzen entfernt
-# Zum Reaktivieren: "- condition: template / value_template: '{{ false }}'" entfernen
+# Steuerung bei Billigstrom (Awattar ≤ 0 ct/kWh) — reaktiviert 2026-06-14
+# Wallboxen (lp1-3): "off" → PV fließt in Batterie
+# Heizstab (lp4-6): "fast" → heizt günstig aus dem Netz
 # ---------------------------------------------------------------------------
 
 - id: batterie_prioritaet_an
-  alias: "Batterie Priorität AN (Strompreis ≤ 0 ct/kWh)"
+  alias: "Billigstrom AN: Wallboxen pausieren, Heizstab schnell (≤ 0 ct/kWh)"
   description: >
-    Stoppt Wallbox-Ladepunkte wenn Preis ≤ 0 ct, Batterie < 80%
-    und PV > 500 W. PV-Strom fließt dann in die Batterie.
-    (Heizstab lp4-6 entfernt — SMA Ennexos übernimmt)
+    Bei Preis ≤ 0 ct, Batterie < 80% und PV > 500W:
+    Wallboxen auf off (PV in Batterie), Heizstab auf fast (günstiger Netzstrom).
   trigger:
     - platform: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
@@ -144,8 +142,6 @@
       entity_id: sensor.pv_gesamtleistung
       above: 500
   condition:
-    - condition: template
-      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
     - condition: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
       below: 0.001
@@ -171,25 +167,36 @@
       data:
         loadpoint: 3
         mode: "off"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 4
+        mode: "fast"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 5
+        mode: "fast"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 6
+        mode: "fast"
     - service: input_boolean.turn_on
       target:
         entity_id: input_boolean.batterie_prioritaet_aktiv
     - service: notify.persistent_notification
       data:
-        title: "Batterie Priorität aktiv"
+        title: "Billigstrom aktiv"
         message: >
-          Wallboxen pausiert – PV fließt in Batterie.
+          Wallboxen pausiert, Heizstab heizt günstig.
           Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
           Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
           PV: {{ states('sensor.pv_gesamtleistung') | int }} W
   mode: single
 
 - id: batterie_prioritaet_aus
-  alias: "Batterie Priorität AUS (Preis > 0 ct oder Batterie ≥ 80% oder kein PV)"
+  alias: "Billigstrom AUS: Alles zurück auf PV-Modus"
   description: >
-    Stellt Wallboxen auf PV-Modus zurück wenn Preis wieder > 0 ct,
-    Batterie ≥ 80% oder PV unter 200 W fällt.
-    (Heizstab lp4-6 entfernt — SMA Ennexos übernimmt)
+    Wenn Preis > 0 ct, Batterie ≥ 80% oder PV < 200W:
+    Wallboxen und Heizstab zurück auf pv-Modus.
   trigger:
     - platform: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
@@ -201,8 +208,6 @@
       entity_id: sensor.pv_gesamtleistung
       below: 200
   condition:
-    - condition: template
-      value_template: "{{ false }}"  # DISABLED: SMA Ennexos 2026-06-07
     - condition: or
       conditions:
         - condition: numeric_state
@@ -230,14 +235,26 @@
       data:
         loadpoint: 3
         mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 4
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 5
+        mode: "pv"
+    - service: rest_command.evcc_loadpoint_mode
+      data:
+        loadpoint: 6
+        mode: "pv"
     - service: input_boolean.turn_off
       target:
         entity_id: input_boolean.batterie_prioritaet_aktiv
     - service: notify.persistent_notification
       data:
-        title: "Batterie Priorität beendet"
+        title: "Billigstrom beendet"
         message: >
-          Wallboxen wieder auf PV-Modus.
+          Alles zurück auf PV-Modus.
           Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
           Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
           PV: {{ states('sensor.pv_gesamtleistung') | int }} W
