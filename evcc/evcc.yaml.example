@@ -1,6 +1,6 @@
 # evcc - Electric Vehicle Charge Controller
 # Dokumentation: https://docs.evcc.io
-# UI: http://192.168.178.71:7070
+# UI: http://YOUR_HOST_IP:7070
 #
 # SETUP: Kopiere diese Datei nach evcc.yaml und trage deine Zugangsdaten ein.
 

@@ -128,7 +128,7 @@ homeassistant:
   auth_providers:
     - type: trusted_networks
       trusted_networks:
-        - 192.168.178.0/24
+        - 192.168.x.0/24  # eigenes LAN-Subnetz eintragen
       allow_bypass_login: true
     - type: homeassistant
 

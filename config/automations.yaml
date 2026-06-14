@@ -248,11 +248,11 @@
     - service: notify.alexa_media
       data:
         target:
-          - media_player.anni_2
-          - media_player.mullers_echo_dot
-          - media_player.mullers_echo_dot_3
-          - media_player.kuche
-          - media_player.mullers_echo_studio
+          - media_player.echo_schlafzimmer
+          - media_player.echo_wohnzimmer
+          - media_player.echo_wohnzimmer_2
+          - media_player.echo_kueche
+          - media_player.echo_studio
         message: >
           Solarstatus: Gesamterzeugung {{ states('sensor.pv_gesamtleistung') | int }} Watt.
           {% if states('sensor.sma_battery_soc_total') | float(-1) >= 0 %}

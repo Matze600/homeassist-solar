@@ -3,6 +3,8 @@
 config/.storage/*
 !config/.storage/lovelace*
 config/.storage/lovelace*.corrupt*
+config/.storage/lovelace.dashboard_evcc
+config/.storage/lovelace.solar
 config/.cloud/
 config/secrets.yaml
 config/known_devices.yaml

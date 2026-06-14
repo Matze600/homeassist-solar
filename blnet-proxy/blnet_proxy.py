@@ -18,8 +18,8 @@ import time
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-BLNET_URL = "http://192.168.178.150"
-BLNET_PASSWORD = "mueller"
+BLNET_URL = "http://BLNET_HOST"       # IP des BL-Net Geräts eintragen
+BLNET_PASSWORD = "YOUR_BLNET_PASSWORD"
 BLNET_NODE = 0
 PROXY_PORT = 8765
 POLL_INTERVAL = 120       # Sekunden zwischen vollständigen Abfragen
@@ -42,7 +42,7 @@ def _load_taid():
         with open(TAID_FILE) as f:
             taid = f.read().strip()
         if taid:
-            _session.cookies.set("TAID", taid, domain="192.168.178.150")
+            _session.cookies.set("TAID", taid, domain=BLNET_URL.split("//")[-1])
             print(f"[{time.strftime('%H:%M:%S')}] Gespeicherte TAID geladen: {taid}", flush=True)
             return taid
     except Exception:
