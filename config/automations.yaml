@@ -127,30 +127,18 @@
 # ---------------------------------------------------------------------------
 
 - id: batterie_prioritaet_an
-  alias: "Billigstrom AN: Wallboxen pausieren, Heizstab schnell (≤ 0 ct/kWh)"
+  alias: "Billigstrom AN: Alles auf fast (≤ 0 ct/kWh)"
   description: >
-    Bei Preis ≤ 0 ct, Batterie < 80% und PV > 500W:
-    Wallboxen auf off (PV in Batterie), Heizstab auf fast (günstiger Netzstrom).
+    Bei Preis ≤ 0 ct: Wallboxen + Heizstab auf fast — alles was geht läuft aus dem Netz.
+    Batterie lädt parallel via SMA (Priorisiertes Batterieladen).
   trigger:
     - platform: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
       below: 0.001
-    - platform: numeric_state
-      entity_id: sensor.sma_battery_soc_total
-      below: 80
-    - platform: numeric_state
-      entity_id: sensor.pv_gesamtleistung
-      above: 500
   condition:
     - condition: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
       below: 0.001
-    - condition: numeric_state
-      entity_id: sensor.sma_battery_soc_total
-      below: 80
-    - condition: numeric_state
-      entity_id: sensor.pv_gesamtleistung
-      above: 500
     - condition: state
       entity_id: input_boolean.batterie_prioritaet_aktiv
       state: "off"
@@ -158,15 +146,15 @@
     - service: rest_command.evcc_loadpoint_mode
       data:
         loadpoint: 1
-        mode: "off"
+        mode: "fast"
     - service: rest_command.evcc_loadpoint_mode
       data:
         loadpoint: 2
-        mode: "off"
+        mode: "fast"
     - service: rest_command.evcc_loadpoint_mode
       data:
         loadpoint: 3
-        mode: "off"
+        mode: "fast"
     - service: rest_command.evcc_loadpoint_mode
       data:
         loadpoint: 4
@@ -186,39 +174,23 @@
       data:
         title: "Billigstrom aktiv"
         message: >
-          Wallboxen pausiert, Heizstab heizt günstig.
-          Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
+          Alles auf Schnellladen — Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
           Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
           PV: {{ states('sensor.pv_gesamtleistung') | int }} W
   mode: single
 
 - id: batterie_prioritaet_aus
-  alias: "Billigstrom AUS: Alles zurück auf PV-Modus"
+  alias: "Billigstrom AUS: Alles zurück auf PV-Modus (> 0 ct/kWh)"
   description: >
-    Wenn Preis > 0 ct, Batterie ≥ 80% oder PV < 200W:
-    Wallboxen und Heizstab zurück auf pv-Modus.
+    Wenn Preis wieder > 0 ct: Wallboxen + Heizstab auf pv — nur noch Solarüberschuss nutzen.
   trigger:
     - platform: numeric_state
       entity_id: sensor.evcc_strompreis_aktuell
       above: 0.001
-    - platform: numeric_state
-      entity_id: sensor.sma_battery_soc_total
-      above: 79.9
-    - platform: numeric_state
-      entity_id: sensor.pv_gesamtleistung
-      below: 200
   condition:
-    - condition: or
-      conditions:
-        - condition: numeric_state
-          entity_id: sensor.evcc_strompreis_aktuell
-          above: 0.001
-        - condition: numeric_state
-          entity_id: sensor.sma_battery_soc_total
-          above: 79.9
-        - condition: numeric_state
-          entity_id: sensor.pv_gesamtleistung
-          below: 200
+    - condition: numeric_state
+      entity_id: sensor.evcc_strompreis_aktuell
+      above: 0.001
     - condition: state
       entity_id: input_boolean.batterie_prioritaet_aktiv
       state: "on"
@@ -254,8 +226,7 @@
       data:
         title: "Billigstrom beendet"
         message: >
-          Alles zurück auf PV-Modus.
-          Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
+          Zurück auf PV-Modus — Preis: {{ states('sensor.evcc_strompreis_aktuell') | float | round(3) }} ct/kWh |
           Batterie: {{ states('sensor.sma_battery_soc_total') | int }}% |
           PV: {{ states('sensor.pv_gesamtleistung') | int }} W
   mode: single
