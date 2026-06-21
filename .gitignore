@@ -42,6 +42,7 @@ mosquitto/log/
 evcc/evcc.yaml
 uni-meter/uni-meter.conf
 .env
+config/automations.yaml
 
 # evcc Laufzeitdaten
 evcc/data/
